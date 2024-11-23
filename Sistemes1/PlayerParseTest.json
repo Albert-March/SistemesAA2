@@ -1,0 +1,8 @@
+{
+	"player" : 
+	{
+		"coins" : 3,
+		"life" : 30,
+		"name" : "Capitana text"
+	}
+}
