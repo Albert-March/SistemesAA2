@@ -20,43 +20,6 @@ public:
 
 	void AddWeapon(const std::string& weapon);
 
-
-	////De un json kei la variable que me interesan y las asigno a esta clase
-	//void Decode(Json::Value json) {
-	//	position.X = json["position"]["x"].asInt();
-	//	position.Y = json["position"]["y"].asInt();
-	//	name = json["name"].asString();
-	//	health = json["health"].asInt();
-	//	lifes = json["life"].asInt();
-	//	damage = json["damage"].asInt();
-	//	coins = json["coins"].asUInt();
-	//	potions = json["potions"].asUInt();
-	//}
-
-	////A partir de esta clase creo un json rellenando con las variables de la clase
-	//Json::Value Enconde() {
-	//	Json::Value json;
-
-	//	json["position"]["x"] = position.X;
-	//	json["position"]["y"] = position.Y;
-	//	json["name"] = name;
-	//	json["health"] = health;
-	//	json["life"] = lifes;
-	//	json["damage"] = damage;
-	//	json["coins"] = coins;
-	//	json["potions"] = potions;
-
-	//	return json;
-	//}
-
-	//static Player* FromJSON(Json::Value json) {
-	//	Player* player = new Player();
-	//	player->Decode(json);
-	//	return player;
-	//}
-
 	void Attack(int EnemyHp, int damage);
-	/*void CollectObjects(std::vector<Arma> arma, int potions);
-	void Heal(int potions);*/
 };
 
