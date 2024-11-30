@@ -24,9 +24,6 @@
     <ClCompile Include="Utils\ConsoleControl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Exemple.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="3Nodes\Node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -42,11 +39,23 @@
     <ClCompile Include="dist\jsoncpp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Player\Player.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Enemy\Enemy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\GameManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\World.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Map.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="2inputSystem\tutorialThreads.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="2inputSystem\InputSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -72,6 +81,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="dist\json\json-forwards.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Player\Player.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Enemy\Enemy.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\GameManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\World.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Map.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

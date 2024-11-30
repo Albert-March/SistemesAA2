@@ -134,25 +134,33 @@
   <ItemGroup>
     <ClCompile Include="2inputSystem\InputSystem.cpp" />
     <ClCompile Include="3Nodes\INodeContent.cpp" />
+    <ClCompile Include="Enemy\Enemy.cpp" />
+    <ClCompile Include="Game\GameManager.cpp" />
+    <ClCompile Include="Game\Map.cpp" />
     <ClCompile Include="dist\jsoncpp.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="3Nodes\Node.cpp" />
-    <ClCompile Include="Exemple.cpp" />
     <ClCompile Include="3Nodes\NodeMap.cpp" />
+    <ClCompile Include="Player\Player.cpp" />
     <ClCompile Include="Utils\ConsoleControl.cpp" />
     <ClCompile Include="3Nodes\Vector2.cpp" />
+    <ClCompile Include="Game\World.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="2inputSystem\InputSystem.h" />
-    <ClInclude Include="2inputSystem\tutorialThreads.h" />
     <ClInclude Include="3Nodes\Node.h" />
     <ClInclude Include="3Nodes\NodeMap.h" />
     <ClInclude Include="3Nodes\INodeContent.h" />
+    <ClInclude Include="Enemy\Enemy.h" />
+    <ClInclude Include="Game\GameManager.h" />
+    <ClInclude Include="Game\Map.h" />
     <ClInclude Include="dist\json\json-forwards.h" />
     <ClInclude Include="dist\json\json.h" />
+    <ClInclude Include="Player\Player.h" />
     <ClInclude Include="Utils\ConsoleControl.h" />
     <ClInclude Include="Utils\InputsConsts.h" />
     <ClInclude Include="3Nodes\Vector2.h" />
+    <ClInclude Include="Game\World.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

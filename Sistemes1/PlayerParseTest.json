@@ -1,8 +1,16 @@
 {
 	"player" : 
 	{
-		"coins" : 3,
-		"life" : 30,
-		"name" : "Capitana text"
+		"coins" : 0,
+		"damage" : 5,
+		"health" : 10,
+		"life" : 0,
+		"name" : "p",
+		"position" : 
+		{
+			"x" : 0,
+			"y" : 0
+		},
+		"potions" : 0
 	}
 }
