@@ -28,11 +28,17 @@ int main() {
 	map.StartInputListener();
 	map.StartMovementControl(500);
 
+	map.AutoSave();
+
 	bool isGameRunning = true;
 	while (isGameRunning) {
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(50));  
+		std::this_thread::sleep_for(std::chrono::milliseconds(50));
+		if (player->lives <= 0) {
+			isGameRunning = false;
+		}
 	}
+	map.StopAutoSave();
 	map.StopThreads();
 	delete player;
 

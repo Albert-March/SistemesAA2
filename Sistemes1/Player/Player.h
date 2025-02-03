@@ -19,7 +19,5 @@ public:
 
 
 	void AddWeapon(const std::string& weapon);
-
-	void Attack(int EnemyHp, int damage);
 };
 

@@ -10,8 +10,3 @@ void Player::AddWeapon(const std::string& weapon) {
 	}
 	std::cout << "No hay espacio para añadir más armas." << std::endl;
 }
-
-void Player::Attack(int EnemyHp, int damage)
-{
-
-}

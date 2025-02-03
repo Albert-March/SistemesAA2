@@ -1,0 +1,41 @@
+{
+	"enemies" : 
+	[
+		{
+			"health" : 100,
+			"position" : 
+			{
+				"x" : 8,
+				"y" : 9
+			}
+		},
+		{
+			"health" : 100,
+			"position" : 
+			{
+				"x" : 2,
+				"y" : 9
+			}
+		}
+	],
+	"mapIndex" : 5,
+	"player" : 
+	{
+		"coins" : 0,
+		"damage" : 10,
+		"health" : 100,
+		"lives" : 3,
+		"position" : 
+		{
+			"x" : 8,
+			"y" : 9
+		},
+		"potions" : 1,
+		"weapons" : 
+		[
+			"Espada",
+			"Lanza",
+			""
+		]
+	}
+}

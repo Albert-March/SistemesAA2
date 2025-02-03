@@ -13,5 +13,9 @@ public:
 	Vector2 operator-=(Vector2 other);
 	Vector2 operator+(Vector2 other);
 	Vector2 operator-(Vector2 other);
+
+	bool operator==(const Vector2& other) const {
+		return (X == other.X && Y == other.Y);
+	}
 };
 

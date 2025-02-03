@@ -1,10 +1,22 @@
 #include "Map.h"
 #include "../Utils/ConsoleControl.h"
 
+#include <fstream>
+#include <json/json.h>
+
 Map::Map(World* world) : _world(world), _nodeMap(nullptr), player(nullptr) {
     if (!_world) {
-        std::cout << "Error: World no está inicializado." << std::endl;
+        std::cout << "World no está inicializado." << std::endl;
     }
+    StartEnemySpawning();
+}
+
+Map::~Map() {
+    StopThreads();
+    for (auto enemy : enemies) {
+        delete enemy;
+    }
+    enemies.clear();
 }
 
 void Map::InitializeMap(NodeMap* sourceMap) {
@@ -33,7 +45,6 @@ void Map::InitializeMap(NodeMap* sourceMap) {
     }
     DrawMap();  
 }
-
 
 void Map::SwitchToMap(NodeMap* sourceMap, NodeMap* targetMap) {
     if (_nodeMap == nullptr || targetMap == nullptr) {
@@ -186,6 +197,15 @@ void Map::StartInputListener() {
     inputSystem.AddListener(K_LEFT, [&]() { MovePlayer(-1, 0); });
     inputSystem.AddListener(K_RIGHT, [&]() { MovePlayer(1, 0); });
 
+    inputSystem.AddListener(K_P, [&]() {
+        if (player->potions > 0 && player->lives < 3)
+        {
+            player->lives++;
+            player->potions--;
+            DrawMap();
+        }
+        });
+
     inputThread = std::thread([&]() {
         inputSystem.StartListen();
         });
@@ -197,15 +217,6 @@ void Map::StartMovementControl(int intervalMs) {
             std::this_thread::sleep_for(std::chrono::milliseconds(intervalMs));
         }
         });
-}
-
-void Map::StopThreads() {
-    isRunning = false;
-
-    if (inputThread.joinable()) inputThread.join();
-    if (movementThread.joinable()) movementThread.join();
-
-    inputSystem.StopListen();
 }
 
 void Map::MovePlayer(int x, int y) {
@@ -225,8 +236,11 @@ void Map::MovePlayer(int x, int y) {
         return;
     }
     
-    if (content->GetState() == CellState::Chest) {
+    if (content->GetState() == CellState::Chest || content->GetState() == CellState::Enemy) {
 
+        if (content->GetState() == CellState::Enemy) {
+            enemyToDelete = true;
+        }
         int reward = rand() % 100 + 1;
 
         if (weapon == true)
@@ -278,7 +292,7 @@ void Map::MovePlayer(int x, int y) {
 
     if (content->GetState() == CellState::Coin) {
         player->coins += 1;
-        DrawMap(); //Actualiza el map para que se actualizen las monedas
+        DrawMap();
     }
     if (content->GetState() == CellState::Potion) {
         player->potions += 1;
@@ -528,7 +542,6 @@ void Map::MovePlayer(int x, int y) {
         return;
     }
 
-    // Actualizar el nodo como vacío
     _nodeMap->SafePickNode(oldPosition, [](Node* node) {
         if (node != nullptr) {
             INodeContent* emptyContent = new INodeContent(CellState::Empty);
@@ -549,7 +562,6 @@ void Map::MovePlayer(int x, int y) {
     player->position = newPosition;
     stateMutex.unlock();
 
-    // Actualizar el nodo como jugador
     _nodeMap->SafePickNode(newPosition, [](Node* node) {
         if (node != nullptr) {
             INodeContent* playerContent = new INodeContent(CellState::Player);
@@ -569,4 +581,186 @@ void Map::MovePlayer(int x, int y) {
 
     Vector2 mapSize = _nodeMap->GetSize();
     CC::SetPosition(0, mapSize.Y);
+
+    if (enemyToDelete == true)
+    {
+        RemoveEnemy(newPosition);
+    }
+}
+
+void Map::StartEnemySpawning() {
+    enemySpawnThread = std::thread([this]() {
+        while (isRunning) {
+            int waitTime = rand() % 20001 + 5000;
+            std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
+            SpawnEnemy();
+        }
+        });
+}
+
+void Map::SpawnEnemy() {
+    if (!_nodeMap) return;
+
+    Vector2 size = _nodeMap->GetSize();
+    Vector2 spawnPosition;
+    bool validSpawn = false;
+
+    while (!validSpawn) {
+        spawnPosition = Vector2(rand() % (size.X - 2) + 1, rand() % (size.Y - 2) + 1);
+        Node* node = _nodeMap->GetNode(spawnPosition.X, spawnPosition.Y);
+
+        Node* nodeUp = _nodeMap->GetNode(spawnPosition.X, spawnPosition.Y -1);
+        Node* nodeDown = _nodeMap->GetNode(spawnPosition.X, spawnPosition.Y +1);
+        Node* nodeLeft = _nodeMap->GetNode(spawnPosition.X -1, spawnPosition.Y);
+        Node* nodeRight = _nodeMap->GetNode(spawnPosition.X +1, spawnPosition.Y);
+
+        if (node && node->GetContent()->GetState() != CellState::Player &&
+            nodeUp && node->GetContent()->GetState() != CellState::Player&&
+            nodeDown && node->GetContent()->GetState() != CellState::Player&&
+            nodeLeft && node->GetContent()->GetState() != CellState::Player&&
+            nodeRight && node->GetContent()->GetState() != CellState::Player) {
+            validSpawn = true;
+        }
+    }
+
+    Enemy* enemy = new Enemy(spawnPosition, this);
+    enemies.push_back(enemy);
+
+    _nodeMap->SafePickNode(spawnPosition, [](Node* node) {
+        node->SetContent(new INodeContent(CellState::Enemy));
+        });
+
+    DrawMap();
+}
+
+void Map::MoveEnemy(Enemy* enemy) {
+    if (!_nodeMap) return;
+
+    Vector2 oldPos = enemy->GetPosition();
+    Vector2 newPos = oldPos;
+    bool moved = false;
+
+    for (int i = 0; i < 4; i++) {
+        int direction = (rand() % 4) + 1;
+
+        switch (direction) {
+        case 1: newPos = Vector2(oldPos.X, oldPos.Y - 1); break;
+        case 2: newPos = Vector2(oldPos.X, oldPos.Y + 1); break;
+        case 3: newPos = Vector2(oldPos.X - 1, oldPos.Y); break;
+        case 4: newPos = Vector2(oldPos.X + 1, oldPos.Y); break;
+        }
+
+        Node* node = _nodeMap->GetNode(newPos.X, newPos.Y);
+        if (node && node->GetContent()->GetState() == CellState::Empty) {
+
+            _nodeMap->SafePickNode(oldPos, [](Node* node) {
+                node->SetContent(new INodeContent(CellState::Empty));
+                });
+
+            enemy->SetPosition(newPos);
+
+            _nodeMap->SafePickNode(newPos, [](Node* node) {
+                node->SetContent(new INodeContent(CellState::Enemy));
+                });
+
+            DrawMap();
+            moved = true;
+            break;
+        }
+
+        if (node && node->GetContent()->GetState() == CellState::Player)
+        {
+            player->lives--;
+            DrawMap();
+            moved = true;
+            break;
+        }
+    }
+}
+
+void Map::RemoveEnemy(Vector2 position) {
+    enemiesMutex.lock();
+    for (size_t i = 0; i < enemies.size(); ++i) {
+        if (enemies[i]->GetPosition() == position) {
+            enemies[i]->StopMoving();
+            delete enemies[i];
+            enemies.erase(enemies.begin() + i);
+            break;
+        }
+    }
+    enemiesMutex.unlock();
+
+    DrawMap();
+}
+
+void Map::StopThreads() {
+    isRunning = false;
+
+    if (inputThread.joinable()) inputThread.join();
+    if (movementThread.joinable()) movementThread.join();
+    if (enemySpawnThread.joinable()) enemySpawnThread.join();
+
+    inputSystem.StopListen();
+}
+
+void Map::SaveGame() {
+    Json::Value saveData;
+
+    if (player) {
+        saveData["player"]["position"]["x"] = player->position.X;
+        saveData["player"]["position"]["y"] = player->position.Y;
+        saveData["player"]["health"] = player->health;
+        saveData["player"]["lives"] = player->lives;
+        saveData["player"]["damage"] = player->damage;
+        saveData["player"]["coins"] = player->coins;
+        saveData["player"]["potions"] = player->potions;
+
+        Json::Value jsonWeapons(Json::arrayValue);
+        for (const auto& weapon : player->weapons) {
+            jsonWeapons.append(weapon);
+        }
+        saveData["player"]["weapons"] = jsonWeapons;
+    }
+
+    Json::Value enemiesArray(Json::arrayValue);
+    for (const auto& enemy : enemies) {
+        Json::Value enemyData;
+        enemyData["position"]["x"] = enemy->GetPosition().X;
+        enemyData["position"]["y"] = enemy->GetPosition().Y;
+        enemyData["health"] = enemy->IsDead() ? 0 : 100;
+        enemiesArray.append(enemyData);
+    }
+    saveData["enemies"] = enemiesArray;
+
+    saveData["mapIndex"] = mapIndex;
+
+    std::ofstream file("savegame.json");
+    if (file.is_open()) {
+        file << saveData;
+        file.close();
+    }
+    else {
+    }
+}
+
+void Map::AutoSave() {
+    if (autoSaveRunning) return;
+
+    autoSaveRunning = true;
+    autoSaveThread = std::thread([this]() {
+        while (autoSaveRunning) {
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+            SaveGame();
+        }
+        });
+}
+
+void Map::StopAutoSave() {
+    if (!autoSaveRunning) return;
+
+    autoSaveRunning = false;
+
+    if (autoSaveThread.joinable()) {
+        autoSaveThread.join();
+    }
 }
